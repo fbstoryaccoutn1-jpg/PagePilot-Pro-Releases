@@ -1,0 +1,58 @@
+name: Refresh PagePilot Pro v1.0.2 copy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/refresh-v1.0.2-copy.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  refresh-copy:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: fbstoryaccoutn1-jpg/PagePilot-Pro-Releases
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update release notes and metadata
+        shell: bash
+        run: |
+          cat > RELEASE_NOTES.md <<'EOF'
+          ## PagePilot Pro v1.0.2
+
+          Updated commercial Windows release with the existing PagePilot Pro licensing and signed update architecture preserved.
+
+          ### Highlights
+          - Story parallel-ID control and publishing-flow integration fixes
+          - Queue, settings, scheduling and blocked-history UI corrections
+          - Electron browser scaling fix after navigation
+          - Reliability and recovery improvements with duplicate protection preserved
+          - Existing Pro activation, device binding and signed updater remain in place
+
+          Windows 10/11 x64. License activation required.
+          EOF
+
+          cat > release-metadata.json <<'EOF'
+          {
+            "version": "1.0.2",
+            "published_at": "2026-10-05T11:36:04Z",
+            "download_url": "https://github.com/fbstoryaccoutn1-jpg/PagePilot-Pro-Releases/releases/download/v1.0.2/PagePilot-Pro-Setup-1.0.2-Windows-x64.exe",
+            "download_sha256": "fce118ed72db572413c422dcd906fe2d9e47b5b591bf4e1d29bd9a4b01902c99",
+            "download_size": 322203664,
+            "mandatory_update": false,
+            "minimum_version": "1.0.0",
+            "release_notes": [
+              "Updated PagePilot workflow and publishing-flow integration.",
+              "Story parallel publishing control and queue/UI integration fixes.",
+              "Electron browser scaling correction after site navigation.",
+              "Reliability, recovery, scheduling, blocked-job visibility and duplicate-protection fixes."
+            ]
+          }
+          EOF
+
+          gh release edit v1.0.2 --title "PagePilot Pro v1.0.2" --notes-file RELEASE_NOTES.md
+          gh release upload v1.0.2 release-metadata.json --clobber
