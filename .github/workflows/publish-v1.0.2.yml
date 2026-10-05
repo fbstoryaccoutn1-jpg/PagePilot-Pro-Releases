@@ -16,16 +16,14 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: fbstoryaccoutn1-jpg/PagePilot-Pro-Releases
+      ARTIFACT_URL: 'https://sdmntprkoreacentral.oaiusercontent.com/files/00000000-6b44-8206-86df-14208e55e3aa/raw?se=2026-10-05T11%3A31%3A38Z&sp=r&sv=2026-02-06&sr=b&scid=bdf16543-7131-56f0-8967-3916d3b135ae&skoid=f8b66c09-1aa0-4801-9884-173c5cef2b8c&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-10-04T23%3A04%3A19Z&ske=2026-10-05T23%3A04%3A19Z&sks=b&skv=2026-02-06&sig=JyT8WvYlvbjF24biQ%2BidVcRc4q0OXak/4fRXXwRk0v0%3D'
     steps:
       - uses: actions/checkout@v4
 
       - name: Download successful private build artifact
         shell: pwsh
         run: |
-          $url = @'
-https://sdmntprkoreacentral.oaiusercontent.com/files/00000000-6b44-8206-86df-14208e55e3aa/raw?se=2026-10-05T11%3A31%3A38Z&sp=r&sv=2026-02-06&sr=b&scid=bdf16543-7131-56f0-8967-3916d3b135ae&skoid=f8b66c09-1aa0-4801-9884-173c5cef2b8c&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-10-04T23%3A04%3A19Z&ske=2026-10-05T23%3A04%3A19Z&sks=b&skv=2026-02-06&sig=JyT8WvYlvbjF24biQ%2BidVcRc4q0OXak/4fRXXwRk0v0%3D
-'@
-          Invoke-WebRequest -Uri $url -OutFile build-artifact.zip
+          Invoke-WebRequest -Uri $env:ARTIFACT_URL -OutFile build-artifact.zip
           Expand-Archive -Path build-artifact.zip -DestinationPath artifact -Force
 
       - name: Verify and normalize release assets
@@ -59,24 +57,24 @@ https://sdmntprkoreacentral.oaiusercontent.com/files/00000000-6b44-8206-86df-142
       - name: Publish GitHub Release
         shell: pwsh
         run: |
+          $lines = @(
+            '## PagePilot Pro v1.0.2',
+            '',
+            'Commercial Windows release built from the Astra-tested PagePilot branch while preserving the existing PagePilot Pro licensing and signed update architecture.',
+            '',
+            '### Highlights',
+            '- Story parallel-ID control and publishing-flow integration fixes',
+            '- Queue, settings, scheduling and blocked-history UI corrections',
+            '- Electron browser scaling fix after navigation',
+            '- Reliability/recovery improvements and preserved duplicate protection',
+            '- Existing Pro activation, device binding and signed updater remain in place',
+            '',
+            'Windows 10/11 x64. License activation required.'
+          )
+          $lines | Set-Content -Encoding utf8 RELEASE_NOTES.md
           gh release view v1.0.2 *> $null
           if ($LASTEXITCODE -eq 0) {
             gh release upload v1.0.2 PagePilot-Pro-Setup-1.0.2-Windows-x64.exe SHA256SUMS.txt release-metadata.json --clobber
           } else {
-            $notes = @'
-## PagePilot Pro v1.0.2
-
-Commercial Windows release built from the Astra-tested PagePilot branch while preserving the existing PagePilot Pro licensing and signed update architecture.
-
-### Highlights
-- Story parallel-ID control and publishing-flow integration fixes
-- Queue, settings, scheduling and blocked-history UI corrections
-- Electron browser scaling fix after navigation
-- Reliability/recovery improvements and preserved duplicate protection
-- Existing Pro activation, device binding and signed updater remain in place
-
-Windows 10/11 x64. License activation required.
-'@
-            $notes | Set-Content -Encoding utf8 RELEASE_NOTES.md
             gh release create v1.0.2 PagePilot-Pro-Setup-1.0.2-Windows-x64.exe SHA256SUMS.txt release-metadata.json --title 'PagePilot Pro v1.0.2' --notes-file RELEASE_NOTES.md --latest
           }
