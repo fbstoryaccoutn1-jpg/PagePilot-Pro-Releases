@@ -1,0 +1,82 @@
+name: Publish PagePilot Pro v1.0.2
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-v1.0.2.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: windows-2022
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: fbstoryaccoutn1-jpg/PagePilot-Pro-Releases
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download successful private build artifact
+        shell: pwsh
+        run: |
+          $url = @'
+https://sdmntprkoreacentral.oaiusercontent.com/files/00000000-6b44-8206-86df-14208e55e3aa/raw?se=2026-10-05T11%3A31%3A38Z&sp=r&sv=2026-02-06&sr=b&scid=bdf16543-7131-56f0-8967-3916d3b135ae&skoid=f8b66c09-1aa0-4801-9884-173c5cef2b8c&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-10-04T23%3A04%3A19Z&ske=2026-10-05T23%3A04%3A19Z&sks=b&skv=2026-02-06&sig=JyT8WvYlvbjF24biQ%2BidVcRc4q0OXak/4fRXXwRk0v0%3D
+'@
+          Invoke-WebRequest -Uri $url -OutFile build-artifact.zip
+          Expand-Archive -Path build-artifact.zip -DestinationPath artifact -Force
+
+      - name: Verify and normalize release assets
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem artifact -Recurse -File -Filter '*.exe' | Where-Object { $_.Name -match 'PagePilot.*Setup|Setup.*PagePilot' } | Select-Object -First 1
+          if (-not $exe) { throw 'PagePilot Pro installer EXE not found in artifact.' }
+          $target = Join-Path $PWD 'PagePilot-Pro-Setup-1.0.2-Windows-x64.exe'
+          Copy-Item $exe.FullName $target -Force
+          $hash = (Get-FileHash -Algorithm SHA256 $target).Hash.ToLower()
+          $size = (Get-Item $target).Length
+          "$hash  PagePilot-Pro-Setup-1.0.2-Windows-x64.exe" | Set-Content -Encoding ascii SHA256SUMS.txt
+          $metadata = [ordered]@{
+            version = '1.0.2'
+            published_at = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
+            download_url = 'https://github.com/fbstoryaccoutn1-jpg/PagePilot-Pro-Releases/releases/download/v1.0.2/PagePilot-Pro-Setup-1.0.2-Windows-x64.exe'
+            download_sha256 = $hash
+            download_size = $size
+            mandatory_update = $false
+            minimum_version = '1.0.0'
+            release_notes = @(
+              'Astra-tested PagePilot workflow refresh with existing Pro licensing preserved.',
+              'Story parallel publishing control and queue/UI integration fixes.',
+              'Electron browser scaling correction after site navigation.',
+              'Reliability, recovery, scheduling, blocked-job visibility and duplicate-protection fixes.'
+            )
+          }
+          $metadata | ConvertTo-Json -Depth 5 | Set-Content -Encoding utf8 release-metadata.json
+          Get-Content release-metadata.json
+
+      - name: Publish GitHub Release
+        shell: pwsh
+        run: |
+          gh release view v1.0.2 *> $null
+          if ($LASTEXITCODE -eq 0) {
+            gh release upload v1.0.2 PagePilot-Pro-Setup-1.0.2-Windows-x64.exe SHA256SUMS.txt release-metadata.json --clobber
+          } else {
+            $notes = @'
+## PagePilot Pro v1.0.2
+
+Commercial Windows release built from the Astra-tested PagePilot branch while preserving the existing PagePilot Pro licensing and signed update architecture.
+
+### Highlights
+- Story parallel-ID control and publishing-flow integration fixes
+- Queue, settings, scheduling and blocked-history UI corrections
+- Electron browser scaling fix after navigation
+- Reliability/recovery improvements and preserved duplicate protection
+- Existing Pro activation, device binding and signed updater remain in place
+
+Windows 10/11 x64. License activation required.
+'@
+            $notes | Set-Content -Encoding utf8 RELEASE_NOTES.md
+            gh release create v1.0.2 PagePilot-Pro-Setup-1.0.2-Windows-x64.exe SHA256SUMS.txt release-metadata.json --title 'PagePilot Pro v1.0.2' --notes-file RELEASE_NOTES.md --latest
+          }
