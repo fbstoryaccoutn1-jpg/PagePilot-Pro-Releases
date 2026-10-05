@@ -16,7 +16,7 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: fbstoryaccoutn1-jpg/PagePilot-Pro-Releases
-      ARTIFACT_URL: 'https://sdmntprkoreacentral.oaiusercontent.com/files/00000000-6b44-8206-86df-14208e55e3aa/raw?se=2026-10-05T11%3A31%3A38Z&sp=r&sv=2026-02-06&sr=b&scid=bdf16543-7131-56f0-8967-3916d3b135ae&skoid=f8b66c09-1aa0-4801-9884-173c5cef2b8c&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-10-04T23%3A04%3A19Z&ske=2026-10-05T23%3A04%3A19Z&sks=b&skv=2026-02-06&sig=JyT8WvYlvbjF24biQ%2BidVcRc4q0OXak/4fRXXwRk0v0%3D'
+      ARTIFACT_URL: 'https://sdmntpraustraliaeast.oaiusercontent.com/files/00000000-c7e0-81fa-bb7a-f6095a266ca7/raw?se=2026-10-05T11%3A39%3A59Z&sp=r&sv=2026-02-06&sr=b&scid=2f75bdaf-28c8-5e19-9584-cb4c1dab3d50&skoid=f8b66c09-1aa0-4801-9884-173c5cef2b8c&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-10-05T02%3A08%3A17Z&ske=2026-10-06T02%3A08%3A17Z&sks=b&skv=2026-02-06&sig=IhGDJ2C1wcR7B1xxONRpNK7UX878xuzswapq9JiTI0k%3D'
     steps:
       - uses: actions/checkout@v4
 
