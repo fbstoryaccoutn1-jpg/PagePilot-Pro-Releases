@@ -45,7 +45,7 @@ jobs:
             mandatory_update = $false
             minimum_version = '1.0.0'
             release_notes = @(
-              'Astra-tested PagePilot workflow refresh with existing Pro licensing preserved.',
+              'Updated PagePilot workflow with existing Pro licensing preserved.',
               'Story parallel publishing control and queue/UI integration fixes.',
               'Electron browser scaling correction after site navigation.',
               'Reliability, recovery, scheduling, blocked-job visibility and duplicate-protection fixes.'
@@ -60,7 +60,7 @@ jobs:
           $lines = @(
             '## PagePilot Pro v1.0.2',
             '',
-            'Commercial Windows release built from the Astra-tested PagePilot branch while preserving the existing PagePilot Pro licensing and signed update architecture.',
+            'Commercial Windows release with the existing PagePilot Pro licensing and signed update architecture preserved.',
             '',
             '### Highlights',
             '- Story parallel-ID control and publishing-flow integration fixes',
